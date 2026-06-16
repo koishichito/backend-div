@@ -2,6 +2,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from .enums import QuizCategory
+
 
 class UserRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -17,6 +19,7 @@ class QuizCreate(BaseModel):
     choices: list[str] = Field(min_length=2, max_length=10)
     answer_index: int = Field(ge=0)
     explanation: str | None = None
+    category: QuizCategory
 
     @model_validator(mode="after")
     def validate_answer_index(self) -> "QuizCreate":
@@ -34,6 +37,7 @@ class QuizRead(BaseModel):
     choices: list[str]
     answer_index: int
     explanation: str | None
+    category: QuizCategory
     created_at: datetime
     owner: UserRead
 

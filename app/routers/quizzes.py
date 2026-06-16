@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from .. import crud, models, schemas
 from ..auth import get_current_user
 from ..database import get_db
+from ..enums import QuizCategory
 
 router = APIRouter(prefix="/quizzes", tags=["quizzes"])
 
@@ -12,9 +13,12 @@ router = APIRouter(prefix="/quizzes", tags=["quizzes"])
 def list_quizzes(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
+    category: QuizCategory | None = Query(
+        None, description="カテゴリーで絞り込み(sns / internet / ai / java / python / html)"
+    ),
     db: Session = Depends(get_db),
 ):
-    return crud.list_quizzes(db, skip=skip, limit=limit)
+    return crud.list_quizzes(db, skip=skip, limit=limit, category=category)
 
 
 @router.post("", response_model=schemas.QuizRead, status_code=status.HTTP_201_CREATED)

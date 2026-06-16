@@ -1,9 +1,10 @@
 from datetime import datetime
 
-from sqlalchemy import JSON, DateTime, ForeignKey, String, Text, func
+from sqlalchemy import JSON, DateTime, Enum, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
+from .enums import QuizCategory
 
 
 class User(Base):
@@ -27,6 +28,11 @@ class Quiz(Base):
     choices: Mapped[list[str]] = mapped_column(JSON)
     answer_index: Mapped[int]
     explanation: Mapped[str | None] = mapped_column(Text)
+    # カテゴリー(sns / internet / ai / java / python / html)。native_enum=False で
+    # VARCHAR + CHECK 制約として表現するため、MySQL / SQLite どちらでも移植性がある。
+    category: Mapped[QuizCategory] = mapped_column(
+        Enum(QuizCategory, native_enum=False, length=20), index=True
+    )
     owner_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), index=True
     )

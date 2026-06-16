@@ -3,6 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
 from . import models, schemas
+from .enums import QuizCategory
 
 
 def get_user_by_sub(db: Session, keycloak_sub: str) -> models.User | None:
@@ -43,11 +44,17 @@ def create_quiz(db: Session, data: schemas.QuizCreate, owner_id: int) -> models.
     return quiz
 
 
-def list_quizzes(db: Session, skip: int = 0, limit: int = 20) -> list[models.Quiz]:
+def list_quizzes(
+    db: Session,
+    skip: int = 0,
+    limit: int = 20,
+    category: QuizCategory | None = None,
+) -> list[models.Quiz]:
+    stmt = select(models.Quiz).options(selectinload(models.Quiz.owner))
+    if category is not None:
+        stmt = stmt.where(models.Quiz.category == category)
     stmt = (
-        select(models.Quiz)
-        .options(selectinload(models.Quiz.owner))
-        .order_by(models.Quiz.created_at.desc(), models.Quiz.id.desc())
+        stmt.order_by(models.Quiz.created_at.desc(), models.Quiz.id.desc())
         .offset(skip)
         .limit(limit)
     )
