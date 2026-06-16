@@ -124,9 +124,12 @@ curl -s "http://192.168.0.52:8000/quizzes?category=sns"
 エンドポイントを直接叩いて**(password grant)アクセストークンを取得し、それを Bearer
 トークンとして本 API(`/auth/me` 等)に付与する。
 
-- `frontend/config.js` … Keycloak / API の接続先(環境に合わせて編集)
-- `frontend/auth.js` … `login()` / `logout()` / `apiFetch()` / `getCurrentUser()`
-- `frontend/index.html` … ログインフォーム
+- `frontend/index.html` … 画面の土台(ヘッダ・検索・`#app`・サイドバー)
+- `frontend/app.js` … SPA 本体。先頭の `CONFIG` で接続先(API / Keycloak)を設定
+- `frontend/style.css` … スタイル
+
+元コード(最初の `app.js` / `index.html` / 空の `style.css`)からの**差分と理由**は
+[docs/frontend-changes.md](docs/frontend-changes.md) にまとめてある。
 
 ```bash
 # 例: 開発時はフロントを 5173 等で配信(CORS_ORIGINS / Keycloak webOrigins に要登録)
