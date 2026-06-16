@@ -88,14 +88,50 @@ curl -s http://192.168.0.52:8000/auth/me -H "Authorization: Bearer $TOKEN" | jq 
 |----------|------|------|------|
 | GET | `/` | 不要 | ヘルスチェック |
 | GET | `/auth/me` | 要 | 自分のユーザ情報 |
-| GET | `/quizzes` | 不要 | クイズ一覧(`skip` / `limit`) |
-| POST | `/quizzes` | 要 | クイズ作成 |
+| GET | `/quizzes` | 不要 | クイズ一覧(`skip` / `limit` / `category`) |
+| POST | `/quizzes` | 要 | クイズ作成(`category` 必須) |
 | GET | `/quizzes/{id}` | 不要 | クイズ詳細(コメント込み) |
 | DELETE | `/quizzes/{id}` | 要(所有者のみ) | クイズ削除 |
 | GET | `/quizzes/{id}/comments` | 不要 | コメント一覧 |
 | POST | `/quizzes/{id}/comments` | 要 | コメント投稿 |
 
 OpenAPI ドキュメント: `http://192.168.0.52:8000/docs`
+
+## カテゴリー
+
+クイズは `category` 属性(作成時 **必須**)を持つ。許可値は
+**`sns` / `internet` / `ai` / `java` / `python` / `html`**
+(列挙型 + DB の CHECK 制約で担保。MySQL / SQLite どちらでも移植可能。
+値の追加は `app/enums.py` の `QuizCategory` にメンバーを 1 行足すだけ)。
+
+```bash
+# 作成(category を含める。不正値は 422)
+curl -s -X POST http://192.168.0.52:8000/quizzes \
+  -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
+  -d '{"title":"...","question":"...","choices":["A","B"],"answer_index":0,"category":"ai"}'
+
+# 絞り込み(未指定なら全件)
+curl -s "http://192.168.0.52:8000/quizzes?category=sns"
+```
+
+> 注: 既存の MySQL に列を追加する場合、本アプリの `create_all` は既存テーブルを変更しないため、
+> 別途 `ALTER TABLE quizzes ADD COLUMN category VARCHAR(20) ...` が必要(新規 DB では自動作成される)。
+
+## フロントエンド(ログイン)
+
+`frontend/` に、ユーザー名(またはメール)+ パスワードでログインする最小画面を同梱。
+このバックエンドは認証を Keycloak に委譲しているため、フロントは **Keycloak のトークン
+エンドポイントを直接叩いて**(password grant)アクセストークンを取得し、それを Bearer
+トークンとして本 API(`/auth/me` 等)に付与する。
+
+- `frontend/config.js` … Keycloak / API の接続先(環境に合わせて編集)
+- `frontend/auth.js` … `login()` / `logout()` / `apiFetch()` / `getCurrentUser()`
+- `frontend/index.html` … ログインフォーム
+
+```bash
+# 例: 開発時はフロントを 5173 等で配信(CORS_ORIGINS / Keycloak webOrigins に要登録)
+cd frontend && python -m http.server 5173
+```
 
 ## メモ
 

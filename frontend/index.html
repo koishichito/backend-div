@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Quiz IT</title>
+    <script src="app.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <a href="#/"><h1>Quiz IT</h1></a>
+        <div class="row">
+            <input type="text" id="search" placeholder="キーワードを入力" />
+            <button id="btnLoadUsers">検索</button>
+        </div>
+        <div class="titlebuttons">
+            <a href="#/community" class="communitybutton">グループ</a>
+            <a href="#/new" class="titlebutton">クイズを作る</a>
+            <a href="#/login" id="auth-link" class="titlebutton">ログイン</a>
+        </div>
+    </div>
+    <div class="layout">
+        <main id="app"></main>
+        <div class="sidebar">
+            <h3>ランキング</h3>
+        </div>
+    </div>
+</body>
+</html>
